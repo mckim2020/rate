@@ -103,7 +103,7 @@ double ranWalk(double temp, double dt) {
 
 
 int main() {
-    double temp = 7000; // Temperature
+    double temp = 5000; // Temperature
     double dt = 1e-6;
     double fpt = 0.0;
     double fpt_avg = 0.0;
