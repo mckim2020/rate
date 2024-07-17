@@ -3,7 +3,6 @@ type: software
 title: "Transition rate calculation in one dimension."
 preferred-citation:
   title: "Transition rate calculation in one dimension."
-  type: conference-paper
   url: "https://github.com/mckim2020/rate"
   authors:
     - family-names: "Kim"
