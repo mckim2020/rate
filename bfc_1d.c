@@ -22,6 +22,7 @@ double dvdx(long double x) {
 
 // Random number generator (0, 1]
 double r2() {
+    // return (double)rand() / RAND_MAX;
     return ((long double)rand() + 1) / ((long double)RAND_MAX + 2);
 }
 
@@ -33,8 +34,9 @@ void gauss(long double* z1) {
     u1 = r2();
     u2 = r2();
 
-    *z1 = sqrt(-2 * log(u1)) * cos(2 * PI * u2);
-    // *z2 = sqrt(-2 * log(u1)) * sin(2 * PI * u2);
+    // *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * PI * u2);
+    *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+    // *z2 = sqrt(-2.0 * log(u1)) * sin(2.0 * PI * u2);
 }
 
 
@@ -64,7 +66,6 @@ double ranWalk(double temp, double dt) {
     long double fpt;
     double rate;
 
-
     while (1) {
         // Generate Gaussian RV
         gauss(&z1);
@@ -83,9 +84,10 @@ double ranWalk(double temp, double dt) {
         // x = x + dx;
 
         // Termination criteria
-        if ((x-1.1)*(x-1.1) < 1e-1) {
+        // if ((x-1.1)*(x-1.1) < 1e-1) {
+        if (x > 1.1) {
             fpt = dt * itr;
-            rate = 1 / fpt;
+            rate = 1.0 / fpt;
             printf("Transition rate: %.10e\n", rate);
             return fpt;
         }
@@ -103,7 +105,7 @@ double ranWalk(double temp, double dt) {
 
 
 int main() {
-    double temp = 5000; // Temperature
+    double temp = 7000; // Temperature
     double dt = 1e-6;
     double fpt = 0.0;
     double fpt_avg = 0.0;
