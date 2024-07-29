@@ -12,7 +12,8 @@ Eb = 2.08333333333
 # Calculate rates
 temps = np.array([1000*i for i in range(5, 11)])
 temps_inv = 1 / temps
-rate_brute = np.array([1.487890e-2, 2.836256e-2, 5.702567e-2, 7.979205e-2, 1.154460e-1, 1.341438e-1])
+rate_brute = np.array([1.487890e-2, 2.836256e-2, 5.702567e-2, 7.979205e-2, 1.154460e-1, 1.341438e-1]) # OLD
+rate_brute = np.array([1.487941e-02, , 1.326035e-01]) # NEW
 rate_theory = factor * np.exp(- Eb / kB / temps)
 
 # Fit theory to line
