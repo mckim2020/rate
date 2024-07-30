@@ -36,18 +36,18 @@ void gauss(long double* z1) {
 
     // *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * PI * u2);
     *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
-    // *z2 = sqrt(-2.0 * log(u1)) * sin(2.0 * PI * u2);
+    // *z2 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
 }
 
 
 
 // Kramers' rate rule (theory)
-double kramers(double temp) {
+double kramers(double temp, double mu) {
     double factor = 0.0;
     double rate = 0.0;
 
     factor = 0.9003163162;
-    rate = factor * exp(-1.0 / kB / temp);
+    rate = mu * factor * exp(-1.0 / kB / temp);
 
     return rate;
 }
@@ -55,7 +55,7 @@ double kramers(double temp) {
 
 
 // Random walk (discretized time)
-double ranWalk(double temp, double dt) {
+double ranWalk(double temp, double mu, double dt) {
     long double z1;
     long double z2;
 
@@ -72,7 +72,7 @@ double ranWalk(double temp, double dt) {
         // gauss(&z1, &z2);
 
         // Calculate deviation
-        dx = - dvdx(x) * dt + sqrt(2 * kB * temp * dt) * z1;
+        dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * z1;
 
         // Update positions
         x = x + dx;
@@ -109,7 +109,8 @@ double ranWalk(double temp, double dt) {
 
 int main() {
     double temp = 1000; // Temperature
-    double dt = 1e-3;
+    double mu = 1.0; // Mobility tensor
+    double dt = 5e-3;
     double fpt = 0.0;
     double fpt_avg = 0.0;
     double rate_theory = 0.0;
@@ -126,14 +127,14 @@ int main() {
     // Random walk result
     for (count = 0; count < count_max; count++) {
         printf("Current iteration: %d\n", count);
-        fpt = ranWalk(temp, dt);
+        fpt = ranWalk(temp, mu, dt);
         fpt_avg = fpt_avg + fpt;
     }
     fpt_avg = fpt_avg / count_max;
     printf("Average transition rate (random walk): %.6e\n", 1/fpt_avg);
 
     // Theoretical result
-    rate_theory = kramers(temp);
+    rate_theory = kramers(temp, mu);
     printf("Transition rate (Kramers' rule): %.6e\n", rate_theory);
 
     end = clock();
