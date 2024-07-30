@@ -11,9 +11,9 @@ Eb = 1.0
 
 
 # Calculate rates
-temps = np.array([1000*i for i in range(3, 8)])
+temps = np.array([100*i for i in range(15, 21)])
 temps_inv = 1 / temps
-rate_brute = np.array([1.509312e-02, 4.250627e-02, 6.879322e-02, 1.029381e-01, 1.338356e-01]) # NEW
+rate_brute = np.array([3.826167e-04, 6.315928e-04, 9.122555e-04, 1.384604e-03, 1.905692e-03, 2.610109e-03]) # NEW
 rate_theory = factor * np.exp(- Eb / kB / temps)
 
 # Fit theory to line
@@ -36,11 +36,11 @@ plt.clf()
 
 
 
-# Plot potential energy
-x = np.linspace(-1.6, 1.6, 100)
-u = x**4-2*x**2
-plt.plot(x, u, c='black')
-plt.xlabel(r'$x$')
-plt.title(r'$U(x) = x^4 - 2x^2$')
-plt.savefig('pot.png')
-plt.clf()
+# # Plot potential energy
+# x = np.linspace(-1.6, 1.6, 100)
+# u = x**4-2*x**2
+# plt.plot(x, u, c='black')
+# plt.xlabel(r'$x$')
+# plt.title(r'$U(x) = x^4 - 2x^2$')
+# plt.savefig('pot.png')
+# plt.clf()
