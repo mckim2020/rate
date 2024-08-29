@@ -28,7 +28,7 @@ double r2() {
 
 // Gaussian RV generator - saves via pointer
 // Box-Mueller method
-void gauss(long double* z1) {
+void gauss(long double* z1, long double* z2) {
     long double u1, u2;
 
     u1 = r2();
@@ -36,7 +36,7 @@ void gauss(long double* z1) {
 
     // *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * PI * u2);
     *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
-    // *z2 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
+    *z2 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
 }
 
 
@@ -63,13 +63,13 @@ double ranWalk(double temp, double mu, double dt) {
     long double dx;
 
     int itr = 0;
-    long double fpt;
-    double rate;
+    long double fpt = 0.0;
+    // double rate;
 
     while (1) {
         // Generate Gaussian RV
-        gauss(&z1);
-        // gauss(&z1, &z2);
+        // gauss(&z1);
+        gauss(&z1, &z2);
 
         // Calculate deviation
         dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * z1;
@@ -77,18 +77,29 @@ double ranWalk(double temp, double mu, double dt) {
         // Update positions
         x = x + dx;
 
-        // // Calculate deviation
-        // dx = - dvdx(x) * dt + sqrt(2 * kB * temp * dt) * z2;
+        // Update count
+        itr = itr + 1;
 
-        // // Update positions
-        // x = x + dx;
+        // Termination criteria
+        if (x >= 1.0) {
+            fpt = dt * itr;
+            // rate = 1.0 / fpt;
+            // printf("Transition rate: %.10e\n", rate);
+            return fpt;
+        }
+
+        // Calculate deviation
+        dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * z2;
+
+        // Update positions
+        x = x + dx;
 
         // Update count
         itr = itr + 1;
 
         // Termination criteria
         // if ((x-1.1)*(x-1.1) < 1e-1) {
-        if (x > 1.0) {
+        if (x >= 1.0) {
             fpt = dt * itr;
             // rate = 1.0 / fpt;
             // printf("Transition rate: %.10e\n", rate);
@@ -108,7 +119,7 @@ double ranWalk(double temp, double mu, double dt) {
 
 
 int main() {
-    double temp = 1000; // Temperature
+    double temp = 1150; // Temperature
     double mu = 1.0; // Mobility tensor
     double dt = 5e-3;
     double fpt = 0.0;
@@ -116,7 +127,7 @@ int main() {
     double rate_theory = 0.0;
 
     int count;
-    int count_max = 100;
+    int count_max = 1000;
 
     clock_t start, end;
     double cpu_time_used;
@@ -131,11 +142,11 @@ int main() {
         fpt_avg = fpt_avg + fpt;
     }
     fpt_avg = fpt_avg / count_max;
-    printf("Average transition rate (random walk): %.6e\n", 1/fpt_avg);
+    printf("Estimated transition rate (random walk): %.6e\n", 1/fpt_avg);
 
     // Theoretical result
     rate_theory = kramers(temp, mu);
-    printf("Transition rate (Kramers' rule): %.6e\n", rate_theory);
+    printf("Ground truth transition rate (Kramers' rule): %.6e\n", rate_theory);
 
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
