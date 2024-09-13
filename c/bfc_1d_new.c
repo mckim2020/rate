@@ -20,7 +20,7 @@ double dvdx(long double x) {
 
 
 
-// Random number generator (0, 1]
+// Random number generator (0, 1)
 double r2() {
     // return (double)rand() / RAND_MAX;
     return ((long double)rand() + 1) / ((long double)RAND_MAX + 2);
@@ -119,18 +119,25 @@ double ranWalk(double temp, double mu, double dt) {
 
 
 int main() {
-    double temp = 1150; // Temperature
-    double mu = 1.0; // Mobility tensor
-    double dt = 5e-3;
+    double temp = 1500; // Temperature
+    double mu = 0.02; // Mobility tensor
+    double dt = 1e-2;
     double fpt = 0.0;
     double fpt_avg = 0.0;
     double rate_theory = 0.0;
 
     int count;
-    int count_max = 1000;
+    int count_max = 5000;
 
     clock_t start, end;
     double cpu_time_used;
+
+    // Open file to save fpt values
+    FILE *file = fopen("../data/fpt_values.txt", "w");
+    if (file == NULL) {
+        printf("Error opening file!\n");
+        return 1;
+    }
 
     srand(time(NULL)); // Random seed
     start = clock();
@@ -140,9 +147,15 @@ int main() {
         printf("Current iteration: %d\n", count);
         fpt = ranWalk(temp, mu, dt);
         fpt_avg = fpt_avg + fpt;
+
+        // Write the fpt value to the file
+        fprintf(file, "%.6e\n", fpt);
     }
     fpt_avg = fpt_avg / count_max;
     printf("Estimated transition rate (random walk): %.6e\n", 1/fpt_avg);
+
+    // Close the file
+    fclose(file);
 
     // Theoretical result
     rate_theory = kramers(temp, mu);
