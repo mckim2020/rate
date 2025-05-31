@@ -10,11 +10,11 @@
 
 
 // Potential function
-double pot(long double x) {
+double pot(double x) {
     return x*x*x*x - 2*x*x;
 }
 
-double dvdx(long double x) {
+double dvdx(double x) {
     return 4*x*x*x - 4*x;
 }
 
@@ -23,13 +23,13 @@ double dvdx(long double x) {
 // Random number generator (0, 1)
 double r2() {
     // return (double)rand() / RAND_MAX;
-    return ((long double)rand() + 1) / ((long double)RAND_MAX + 2);
+    return ((double)rand() + 1) / ((double)RAND_MAX + 2);
 }
 
 // Gaussian RV generator - saves via pointer
 // Box-Mueller method
-void gauss(long double* z1, long double* z2) {
-    long double u1, u2;
+void gauss(double* z1, double* z2) {
+    double u1, u2;
 
     u1 = r2();
     u2 = r2();
@@ -56,23 +56,28 @@ double kramers(double temp, double mu) {
 
 // Random walk (discretized time)
 double ranWalk(double temp, double mu, double dt) {
-    long double z1;
-    long double z2;
+    double z1;
+    double z2;
+    double z3;
+    double z4;
 
-    long double x = -1.0;
-    long double dx;
+    double x = -1.0;
+    double dx;
 
     int itr = 0;
-    long double fpt = 0.0;
+    double fpt = 0.0;
     // double rate;
 
     while (1) {
         // Generate Gaussian RV
         // gauss(&z1);
         gauss(&z1, &z2);
+        gauss(&z3, &z4);
 
         // Calculate deviation
-        dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * z1;
+        // dx = - mu * dvdx(x) * dt + sqrt(0.5 * mu * kB * temp * dt) * (z1 + z3);
+        dx = - mu * dvdx(x) * dt + sqrt(2.0 * mu * kB * temp * dt) * z1;
+        // dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * 0.5 * (z1 + z2);
 
         // Update positions
         x = x + dx;
@@ -88,31 +93,31 @@ double ranWalk(double temp, double mu, double dt) {
             return fpt;
         }
 
-        // Calculate deviation
-        dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * z2;
+        // // Calculate deviation
+        // dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * z2;
 
-        // Update positions
-        x = x + dx;
-
-        // Update count
-        itr = itr + 1;
-
-        // Termination criteria
-        // if ((x-1.1)*(x-1.1) < 1e-1) {
-        if (x >= 1.0) {
-            fpt = dt * itr;
-            // rate = 1.0 / fpt;
-            // printf("Transition rate: %.10e\n", rate);
-            return fpt;
-        }
+        // // Update positions
+        // x = x + dx;
 
         // // Update count
         // itr = itr + 1;
 
-        // // Print progress
-        // if (itr%100000000==0) {
-        //     printf("Current iteration: %d\n", itr);
+        // // Termination criteria
+        // // if ((x-1.1)*(x-1.1) < 1e-1) {
+        // if (x >= 1.0) {
+        //     fpt = dt * itr;
+        //     // rate = 1.0 / fpt;
+        //     // printf("Transition rate: %.10e\n", rate);
+        //     return fpt;
         // }
+
+        // // Update count
+        // itr = itr + 1;
+
+        // Print progress
+        if (itr%100000000==0) {
+            printf("Current iteration: %d\n", itr);
+        }
     }
 }
 
@@ -127,7 +132,7 @@ int main() {
     double rate_theory = 0.0;
 
     int count;
-    int count_max = 5000;
+    int count_max = 10;
 
     clock_t start, end;
     double cpu_time_used;
