@@ -130,7 +130,7 @@ double ranWalk(double temp, double mu, double dt) {
 
 
 int main() {
-    double temp = 1500.0; // Temperature
+    double temp = 1000.0; // Temperature
     double mu = 0.02; // Mobility tensor
     double dt = 1e-2; // Time step
     double fpt = 0.0; // First passage time
@@ -138,14 +138,14 @@ int main() {
     double rate_theory = 0.0; // Theoretical rate
 
     int count;
-    int count_max = 10000;
+    int count_max = 10000; // 0.9 seconds (1500K), 22.9 seconds (1000K)
 
     clock_t start, end;
     double cpu_time_used;
 
     // Open file to save fpt values
     char filename[100]; // Buffer to hold the filename
-    sprintf(filename, "../data/fpt_values_%d.txt", (int)temp);
+    sprintf(filename, "./data/fpt_values_%d.txt", (int)temp);
     FILE *file = fopen(filename, "w");
 
     if (file == NULL) {
