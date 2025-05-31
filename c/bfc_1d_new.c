@@ -23,7 +23,10 @@ double dvdx(double x) {
 // Random number generator (0, 1)
 double r2() {
     // return (double)rand() / RAND_MAX;
-    return ((double)rand() + 1) / ((double)RAND_MAX + 2);
+    // return ((double)rand() + 1) / ((double)RAND_MAX + 2);
+    // return ((double)rand()) / ((double)RAND_MAX + 1.0);
+    double random_number = (double)rand() / (RAND_MAX + 1.0);
+    return random_number;
 }
 
 // Gaussian RV generator - saves via pointer
@@ -37,6 +40,36 @@ void gauss(double* z1, double* z2) {
     // *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * PI * u2);
     *z1 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
     *z2 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
+}
+
+double box_mueller() {
+    static int has_spare = 0;
+    static double spare;
+    
+    if (has_spare) {
+        has_spare = 0;
+        return spare;
+    } else {
+        double u1, u2, radius, theta;
+        double z1;
+        
+        // Get two uniform random numbers in (0,1)
+        do {
+            u1 = r2();
+            u2 = r2();
+        } while (u1 <= 0); // Ensure u1 is not 0
+        
+        // Box-Mueller transformation
+        radius = sqrt(-2.0 * log(u1));
+        theta = 2.0 * M_PI * u2;
+        
+        // Generate two normal random variables
+        z1 = radius * cos(theta);
+        spare = radius * sin(theta);
+        
+        has_spare = 1;
+        return z1;
+    }
 }
 
 
@@ -58,26 +91,22 @@ double kramers(double temp, double mu) {
 double ranWalk(double temp, double mu, double dt) {
     double z1;
     double z2;
-    double z3;
-    double z4;
 
     double x = -1.0;
     double dx;
 
     int itr = 0;
     double fpt = 0.0;
-    // double rate;
+
+    // Initialize random numbers
+    z1 = box_mueller();
+    z2 = box_mueller();
 
     while (1) {
-        // Generate Gaussian RV
-        // gauss(&z1);
-        gauss(&z1, &z2);
-        gauss(&z3, &z4);
-
-        // Calculate deviation
-        // dx = - mu * dvdx(x) * dt + sqrt(0.5 * mu * kB * temp * dt) * (z1 + z3);
-        dx = - mu * dvdx(x) * dt + sqrt(2.0 * mu * kB * temp * dt) * z1;
-        // dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * 0.5 * (z1 + z2);
+        // Leimkuhler Matthews (2012) https://arxiv.org/abs/1203.5428
+        dx = - mu * dvdx(x) * dt + sqrt(mu * kB * temp * dt / 2.0) * (z1 + z2);
+        z1 = z2;
+        z2 = box_mueller();
 
         // Update positions
         x = x + dx;
@@ -88,31 +117,8 @@ double ranWalk(double temp, double mu, double dt) {
         // Termination criteria
         if (x >= 1.0) {
             fpt = dt * itr;
-            // rate = 1.0 / fpt;
-            // printf("Transition rate: %.10e\n", rate);
             return fpt;
         }
-
-        // // Calculate deviation
-        // dx = - mu * dvdx(x) * dt + sqrt(2 * mu * kB * temp * dt) * z2;
-
-        // // Update positions
-        // x = x + dx;
-
-        // // Update count
-        // itr = itr + 1;
-
-        // // Termination criteria
-        // // if ((x-1.1)*(x-1.1) < 1e-1) {
-        // if (x >= 1.0) {
-        //     fpt = dt * itr;
-        //     // rate = 1.0 / fpt;
-        //     // printf("Transition rate: %.10e\n", rate);
-        //     return fpt;
-        // }
-
-        // // Update count
-        // itr = itr + 1;
 
         // Print progress
         if (itr%100000000==0) {
@@ -124,21 +130,24 @@ double ranWalk(double temp, double mu, double dt) {
 
 
 int main() {
-    double temp = 1500; // Temperature
+    double temp = 1500.0; // Temperature
     double mu = 0.02; // Mobility tensor
-    double dt = 1e-2;
-    double fpt = 0.0;
-    double fpt_avg = 0.0;
-    double rate_theory = 0.0;
+    double dt = 1e-2; // Time step
+    double fpt = 0.0; // First passage time
+    double fpt_avg = 0.0; // Average first passage time
+    double rate_theory = 0.0; // Theoretical rate
 
     int count;
-    int count_max = 10;
+    int count_max = 10000;
 
     clock_t start, end;
     double cpu_time_used;
 
     // Open file to save fpt values
-    FILE *file = fopen("../data/fpt_values.txt", "w");
+    char filename[100]; // Buffer to hold the filename
+    sprintf(filename, "../data/fpt_values_%d.txt", (int)temp);
+    FILE *file = fopen(filename, "w");
+
     if (file == NULL) {
         printf("Error opening file!\n");
         return 1;
