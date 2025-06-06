@@ -95,7 +95,7 @@ double ranWalk(double temp, double mu, double dt) {
     double x = -1.0;
     double dx;
 
-    int itr = 0;
+    long int itr = 0;
     double fpt = 0.0;
 
     // Initialize random numbers
