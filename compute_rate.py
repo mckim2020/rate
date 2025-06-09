@@ -9,7 +9,7 @@ parser.add_argument('--mu', type=float, default=0.02, help="mobility constant (d
 parser.add_argument('--kB', type=float, default=8.617333262e-5, help="Boltzmann constant (default is 8.617333262e-5)")
 parser.add_argument('--factor', type=float, default=0.9003163162, help="pre-exponential factor (default is 0.9003163162)")
 parser.add_argument('--fpt_dir', type=str, default="./data", help="directory containing first passage time data")
-parser.add_argument('--bins', type=int, default=1000, help="number of bins for histogram (default is 1000)")
+parser.add_argument('--bins', type=int, default=100, help="number of bins for histogram (default is 1000)")
 parser.add_argument('--verbose', action='store_true', help="print verbose output")
 args = parser.parse_args()
 

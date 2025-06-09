@@ -56,6 +56,7 @@ def plot_fpt_histogram(fpt_data, temp, bins=1000):
     import matplotlib.pyplot as plt
 
     plt.figure(figsize=(8, 8))
+    plt.tick_params(axis='both', direction='in')
     plt.hist(fpt_data, bins=bins, edgecolor='black', alpha=0.7)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
@@ -63,9 +64,10 @@ def plot_fpt_histogram(fpt_data, temp, bins=1000):
     plt.xlabel('First Passage Times (s)', fontsize=18)
     plt.ylabel('Frequency', fontsize=18)
     plt.grid(alpha=0.3)
-    plt.axvline(np.mean(fpt_data), color='red', linestyle='dashed', linewidth=1, label=f'Mean: {np.mean(fpt_data):.2e}')
+    plt.axvline(np.mean(fpt_data), color='red', linestyle='dashed', linewidth=5, label=f'MFPT: {np.mean(fpt_data):.2e}')
     # plt.axvline(np.median(data), color='green', linestyle='dashed', linewidth=1, label=f'Median: {np.median(data):.2e}')
     plt.legend(fontsize=18)
+    plt.yscale('log')
     plt.tight_layout()
     plt.savefig(f"fpt_histogram_{temp}.png", dpi=300)
     plt.clf()
